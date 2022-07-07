@@ -1,35 +1,84 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
+import AddEditForm from './AddEditForm';
 
-export class Articles extends Component {
-  static displayName = FetchData.name;
+const Articles = () => {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [addingArticle, setAddingArticle] = useState(false);
+  const [editingArticle, setEditingArticle] = useState(false);
+  const [currentEditingArticle, setCurrentEditingArticle] = useState(null);
 
-  constructor(props) {
-    super(props);
-    this.state = { forecasts: [], loading: true };
+  useEffect(() => {
+    populateWeatherData();
+    setAddingArticle(false);
+  }, []);
+
+  const handleRemoveArticle = async (articleId) => {
+    await fetch(`http://localhost:5079/api/articles/${articleId}`, { method: 'DELETE' });
+    populateWeatherData();
   }
 
-  componentDidMount() {
-    this.populateWeatherData();
+  const handleAddArticle = async (values) => {
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(
+          { 
+              title: values.title,
+              author: values.author,
+              publicationDate: values.publicationDate,
+              body: values.body
+          })
+    };
+    await fetch(`http://localhost:5079/api/articles/`, requestOptions);
+    populateWeatherData();
+    setAddingArticle(false);
   }
 
-  static renderForecastsTable(forecasts) {
+  const handleRequestToEditArticle = (article) => {
+    setCurrentEditingArticle(article);
+    setEditingArticle(true);
+  } 
+
+  const handleEditArticle = async (values) => {
+    const requestOptions = {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(
+          { 
+              id: values.id,
+              title: values.title,
+              author: values.author,
+              publicationDate: values.publicationDate,
+              body: values.body
+          })
+    };
+    await fetch(`http://localhost:5079/api/articles/${values.id}`, requestOptions);
+    populateWeatherData();
+    setEditingArticle(false);
+  }
+
+  const renderForecastsTable = (articles) => {
     return (
       <table className='table table-striped' aria-labelledby="tabelLabel">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Temp. (C)</th>
-            <th>Temp. (F)</th>
-            <th>Summary</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Publication Date</th>
+            <th>Body</th>
+            <th><button onClick={() => setAddingArticle(true)}>Add new Article</button></th>
           </tr>
         </thead>
         <tbody>
-          {forecasts.map(forecast =>
-            <tr key={forecast.date}>
-              <td>{forecast.date}</td>
-              <td>{forecast.temperatureC}</td>
-              <td>{forecast.temperatureF}</td>
-              <td>{forecast.summary}</td>
+          {articles.map(article =>
+            <tr key={article.id}>
+              <td>{article.title}</td>
+              <td>{article.author}</td>
+              <td>{article.publicationDate}</td>
+              <td>{article.body}</td>
+              <td><button onClick={() => handleRemoveArticle(article.id)}>Remove</button></td>
+              <td><button onClick={() => handleRequestToEditArticle(article)}>Edit</button></td>
             </tr>
           )}
         </tbody>
@@ -37,27 +86,27 @@ export class Articles extends Component {
     );
   }
 
-  render() {
-    let contents = this.state.loading
-      ? <p><em>Loading...</em></p>
-      : FetchData.renderForecastsTable(this.state.forecasts);
-
-    return (
-      <div>
-        <h1 id="tabelLabel" >List of articles</h1>
-        <p>This component demonstrates fetching data from the server.</p>
-        {contents}
-      </div>
-    );
-  }
-
-  async populateWeatherData() {
-    const response = await fetch('http://localhost:5079/api/articles', {
-        method: 'GET',
-        headers: new Headers({ 'Content-type': 'application/json'}),
-        //mode: 'no-cors'
-    });
+  const populateWeatherData = async () => {
+    const response = await fetch('http://localhost:5079/api/articles');
     const data = await response.json();
-    this.setState({ articles: data, loading: false });
+    setArticles(data);
+    setLoading(false);
   }
+
+
+  let contents = loading
+    ? <p><em>Loading...</em></p>
+    : renderForecastsTable(articles);
+
+  return (
+    <div>
+      <h1 id="tabelLabel" >List of articles</h1>
+      <p>See the list of articles bellow...</p>
+      {contents}
+      {!addingArticle || <AddEditForm onSubmit={handleAddArticle} />}
+      {!editingArticle || <AddEditForm onSubmit={handleEditArticle} values={currentEditingArticle} />}
+    </div>
+  );
 }
+
+export default Articles;

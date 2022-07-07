@@ -1,5 +1,5 @@
 ﻿using AssessmentCrudArticles.Models;
-using AssessmentCrudArticles.Repositories;
+using AssessmentCrudArticles.Context;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +16,6 @@ namespace AssessmentCrudArticles
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<AssessmentContext>(opt =>
@@ -34,21 +33,8 @@ namespace AssessmentCrudArticles
                     builder.SetIsOriginAllowed(isOriginAllowed: _ => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
                 });
             });
-
-            //services.AddCors(options =>
-            //{
-            //    options.AddDefaultPolicy(
-            //        builder =>
-            //        {
-            //            builder.AllowAnyOrigin()
-            //                                .AllowAnyHeader()
-            //                                .AllowAnyMethod();
-            //        });
-            //});
-            //services.AddScoped<IProductsDomainService, ProductsDomainService>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AssessmentContext? context)
         {
             if (env.IsDevelopment())
@@ -56,7 +42,6 @@ namespace AssessmentCrudArticles
                 app.UseDeveloperExceptionPage();
             }
 
-            //var context = app.ApplicationServices.GetService<AssessmentContext>();
             AddTestData(context);
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions

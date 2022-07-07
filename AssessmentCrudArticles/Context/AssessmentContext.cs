@@ -1,7 +1,7 @@
 ﻿using AssessmentCrudArticles.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AssessmentCrudArticles.Repositories
+namespace AssessmentCrudArticles.Context
 {
     public class AssessmentContext : DbContext
     {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AssessmentCrudArticles.Models;
-using AssessmentCrudArticles.Repositories;
+using AssessmentCrudArticles.Context;
 
 namespace AssessmentCrudArticles.Controllers
 {
