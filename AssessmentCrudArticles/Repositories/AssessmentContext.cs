@@ -10,6 +10,6 @@ namespace AssessmentCrudArticles.Repositories
         {
         }
 
-        public DbSet<Article> Users { get; set; }
+        public DbSet<Article> Articles { get; set; }
     }
 }
